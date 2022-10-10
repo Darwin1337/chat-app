@@ -1,5 +1,5 @@
 # chat-app
-Chat app made with Javascript and Socket.io
+Chat app made with Javascript and Socket.io.
 Accessible at: https://definitely-a-chat-app.herokuapp.com/
 
 ## Project setup
