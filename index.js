@@ -14,7 +14,6 @@ app.get('/', (req, res) => {
 
 io.on('connection', (socket) => {
   socket.on('LogUser', (nickname) => {
-	console.log("Connected user");
     if (!currentUsers.some(user => user.nickname === nickname)) {
       currentUsers.push({ socket__id: socket.id, nickname: nickname });
       userLog.push({ nickname: nickname, time: new Date(), loggedIn: true });
@@ -25,11 +24,6 @@ io.on('connection', (socket) => {
     } else {
       socket.emit('ShowError', 'The chosen name has already been taken!');
     }
-  });
-  
-  socket.on('LogoutUser', () => {
-	console.log("Disconnected user");
-    socket.disconnect(true);
   });
 
   socket.on('disconnect', () => {
