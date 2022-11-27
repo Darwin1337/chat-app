@@ -3,10 +3,13 @@ const app = express();
 const http = require('http');
 const server = http.createServer(app);
 const { Server } = require("socket.io");
-const io = new Server(server);
+const cors = require("cors");
+const io = new Server(server, { cors: { origin: "http://localhost:3000" } });
+
 let currentUsers = [], userLog = [], messages = []
 
 app.use(express.static(__dirname));
+app.use(cors());
 
 app.get('/', (req, res) => {
   res.sendFile(__dirname + '/index.html');
@@ -28,18 +31,11 @@ io.on('connection', (socket) => {
   });
   
   socket.on('LogoutUser', () => {
-	console.log("Disconnected user");
-    socket.disconnect(true);
+	handleLogout(socket);
   });
 
   socket.on('disconnect', () => {
-    const user = currentUsers.find(user => user.socket__id === socket.id);
-    if (user) {
-      userLog.push({ nickname: user.nickname, time: new Date(), loggedIn: false });
-      currentUsers = currentUsers.filter(user => user.socket__id !== socket.id);
-      io.emit('RenderUsersList', currentUsers);
-      io.emit('RenderUserLog', userLog);
-    }
+	handleLogout(socket);
   });
 
   socket.on('chat message', (msg) => {
@@ -48,6 +44,18 @@ io.on('connection', (socket) => {
   });
 });
 
-server.listen(process.env.PORT || 3000, () => {
-  console.log('listening on *:' + (process.env.PORT) ? process.env.PORT : 3000);
+const handleLogout = (socket) => {
+    const user = currentUsers.find(user => user.socket__id === socket.id);
+    if (user) {
+      userLog.push({ nickname: user.nickname, time: new Date(), loggedIn: false });
+      currentUsers = currentUsers.filter(user => user.socket__id !== socket.id);
+	  console.log("removed user");
+	  console.log(user);
+      io.emit('RenderUsersList', currentUsers);
+      io.emit('RenderUserLog', userLog);
+    }
+}
+
+server.listen(3000, () => {
+  console.log('Listening on http://localhost:3000');
 });
